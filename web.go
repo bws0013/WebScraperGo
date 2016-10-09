@@ -31,23 +31,60 @@ func main() {
 	url := "http://auburn.edu/~bws0013/"
 
 	//fmt.Println("Hello world")
-	links := getPageWords(url)
+
+	fmt.Println("stop 1")
+	links := makeGlobalSet(url)
 
 	vals := links.Values()
 
 	sites := arraystack.New()
+	fmt.Println("stop 2")
 	for i := 0; i < len(vals); i++ {
 		sites.Push(vals[i])
 	}
-
+	fmt.Println("stop 3")
 	for i := 0; i < len(vals); i++ {
 		fmt.Println(sites.Pop())
 	}
+	fmt.Println("stop 4")
 
 }
 
+/*
+	Returns all of the links from all the pages a specified page links to
+
+	ie returns all of the links on the all of the pages the homepage of wikipedia links to
+*/
+// TODO: Figure out why this throws an error.
+func makeGlobalSet(url string) *hashset.Set {
+	returnSet := hashset.New()
+
+	addToReturnSet := getPageWords(url)
+
+	vals := addToReturnSet.Values()
+	fmt.Println("stop 6")
+	for i := 0; i < len(vals); i++ {
+		tempUrl := vals[i].(string)
+		fmt.Println(tempUrl)
+		tempAddToReturnSet := getPageWords(tempUrl)
+		tempVals := tempAddToReturnSet.Values()
+		for j := 0; j < len(tempVals); j++ {
+			returnSet.Add(tempVals[j])
+		}
+
+	}
+	fmt.Println("stop 5")
+	return returnSet
+}
+
+/*
+Returns all of the links on a specified page
+
+ie returns all of the links on the homepage of wikipedia
+
+*/
 func getPageWords(url string) *hashset.Set {
-	set := hashset.New()
+	returnSet := hashset.New()
 
 	response, _ := http.Get(url)
 	z := html.NewTokenizer(response.Body)
@@ -58,22 +95,23 @@ func getPageWords(url string) *hashset.Set {
 		switch {
 		case tt == html.ErrorToken:
 			// End of the document, we're done
-			return set
+			return returnSet
 		case tt == html.StartTagToken:
 			t := z.Token()
 			for _, a := range t.Attr {
 				if a.Key == "href" {
-					//fmt.Println("Found href:", a.Val)
+					fmt.Println("Found href:", a.Val)
 					var temp string
 					temp = a.Val
-					set.Add(temp)
+					returnSet.Add(temp)
+					//bs.Add(temp)
 					break
 				}
 			}
 		}
 	}
-
-	return set
+	fmt.Println("stop 7")
+	return returnSet
 }
 
 /*
