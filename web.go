@@ -6,6 +6,7 @@ import (
 	"github.com/emirpasic/gods/stacks/arraystack"
 	"golang.org/x/net/html"
 	"net/http"
+	"strings"
 )
 
 /*
@@ -32,37 +33,45 @@ func main() {
 
 	//fmt.Println("Hello world")
 
-	fmt.Println("stop 1")
 	links := makeGlobalSet(url)
 
 	vals := links.Values()
 
 	sites := arraystack.New()
-	fmt.Println("stop 2")
+
 	for i := 0; i < len(vals); i++ {
 		sites.Push(vals[i])
 	}
-	fmt.Println("stop 3")
+
 	for i := 0; i < len(vals); i++ {
 		fmt.Println(sites.Pop())
 	}
-	fmt.Println("stop 4")
 
+}
+
+// Adds http to urls that do not have it. This fixes an error of urls that dont have it.
+func formatUrl(inputUrl string) string {
+	if strings.HasPrefix(inputUrl, "https://") {
+		return inputUrl
+	} else if strings.HasPrefix(inputUrl, "http://") {
+		return inputUrl
+	} else {
+		return ("http://" + inputUrl)
+	}
+	return "ERROR"
 }
 
 /*
 	Returns all of the links from all the pages a specified page links to
 
-	ie returns all of the links on the all of the pages the homepage of wikipedia links to
+	ie returns the links from all of the pages the homepage of wikipedia links to
 */
-// TODO: Figure out why this throws an error.
 func makeGlobalSet(url string) *hashset.Set {
 	returnSet := hashset.New()
 
 	addToReturnSet := getPageWords(url)
 
 	vals := addToReturnSet.Values()
-	fmt.Println("stop 6")
 	for i := 0; i < len(vals); i++ {
 		tempUrl := vals[i].(string)
 		fmt.Println(tempUrl)
@@ -73,7 +82,6 @@ func makeGlobalSet(url string) *hashset.Set {
 		}
 
 	}
-	fmt.Println("stop 5")
 	return returnSet
 }
 
@@ -86,9 +94,14 @@ ie returns all of the links on the homepage of wikipedia
 func getPageWords(url string) *hashset.Set {
 	returnSet := hashset.New()
 
-	response, _ := http.Get(url)
-	z := html.NewTokenizer(response.Body)
+	url = formatUrl(url)
 
+	response, err := http.Get(url)
+	// If there is an error, abandon ship!
+	if err != nil {
+		return returnSet
+	}
+	z := html.NewTokenizer(response.Body)
 	for {
 		tt := z.Next()
 
@@ -100,7 +113,7 @@ func getPageWords(url string) *hashset.Set {
 			t := z.Token()
 			for _, a := range t.Attr {
 				if a.Key == "href" {
-					fmt.Println("Found href:", a.Val)
+					// fmt.Println("Found href:", a.Val)
 					var temp string
 					temp = a.Val
 					returnSet.Add(temp)
@@ -110,7 +123,6 @@ func getPageWords(url string) *hashset.Set {
 			}
 		}
 	}
-	fmt.Println("stop 7")
 	return returnSet
 }
 
