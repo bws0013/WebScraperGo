@@ -49,6 +49,29 @@ func main() {
 
 }
 
+// Iterates over the url, adding links to the finList for every int numTimes,
+// This needs to be changed to iterate over the whole sites stack each iteration.
+func iterateOverLinks(url string, numTimes int) {
+	finList := hashset.New()
+	sites := arraystack.New()
+
+	for k := 0; k < numTimes; k++ {
+		links := makeGlobalSet(url)
+		vals := links.Values()
+
+		for i := 0; i < len(vals); i++ {
+			if finList.Contains(vals[i]) {
+
+			} else {
+				finList.Add(vals[i])
+				sites.Push(vals[i])
+			}
+		}
+
+	}
+
+}
+
 // Adds http to urls that do not have it. This fixes an error of urls that dont have it.
 func formatUrl(inputUrl string) string {
 	if strings.HasPrefix(inputUrl, "https://") {
