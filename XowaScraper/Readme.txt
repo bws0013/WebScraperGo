@@ -1,0 +1,1 @@
+This will be used to scape the xowa wikipedia copy on my computer and turn it into a real series of html files. 
