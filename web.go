@@ -33,43 +33,52 @@ func main() {
 
 	//fmt.Println("Hello world")
 
-	links := makeGlobalSet(url)
+	//links := getPageWords(url)
+
+	links := iterateOverLinks(url, 2)
 
 	vals := links.Values()
 
-	sites := arraystack.New()
-
-	for i := 0; i < len(vals); i++ {
-		sites.Push(vals[i])
-	}
-
-	for i := 0; i < len(vals); i++ {
-		fmt.Println(sites.Pop())
+	for _, value := range vals {
+		fmt.Println(value)
 	}
 
 }
 
-// Iterates over the url, adding links to the finList for every int numTimes,
-// This needs to be changed to iterate over the whole sites stack each iteration.
-func iterateOverLinks(url string, numTimes int) {
-	finList := hashset.New()
-	sites := arraystack.New()
+func iterateOverLinks(url string, numTimes int) *hashset.Set {
+	masterList := hashset.New()
+	masterStack := arraystack.New()
 
-	for k := 0; k < numTimes; k++ {
-		links := makeGlobalSet(url)
-		vals := links.Values()
+	masterStack.Push(url)
 
-		for i := 0; i < len(vals); i++ {
-			if finList.Contains(vals[i]) {
+	for numTimes > 0 {
+		numTimes--
 
-			} else {
-				finList.Add(vals[i])
-				sites.Push(vals[i])
+		retSet := hashset.New()
+		for masterStack.Size() > 0 {
+			currentUrl, err := masterStack.Pop()
+			if err == false {
+				break
+			}
+			tempSet := getPageWords(currentUrl.(string))
+			toStore := tempSet.Values()
+			for _, value := range toStore {
+				retSet.Add(value)
 			}
 		}
 
+		linkNames := retSet.Values()
+		for _, value := range linkNames {
+			if masterList.Contains(value) {
+				continue
+			} else {
+				masterList.Add(value)
+				masterStack.Push(value)
+			}
+		}
 	}
 
+	return masterList
 }
 
 // Adds http to urls that do not have it. This fixes an error of urls that dont have it.
