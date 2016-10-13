@@ -29,49 +29,53 @@ import (
 
 func main() {
 
+	// url is the starting point of our search
 	url := "http://auburn.edu/~bws0013/"
-
-	//fmt.Println("Hello world")
 
 	//links := getPageWords(url)
 
+	// provide our url and the maximum depth we are trying to go within the web pages
 	links := iterateOverLinks(url, 2)
 
 	vals := links.Values()
 
+	// All of the pages we visited in our search
 	for _, value := range vals {
 		fmt.Println(value)
 	}
 
 }
 
+// Perform a modified iterative deepening search, given a web address and a max depth
 func iterateOverLinks(url string, numTimes int) *hashset.Set {
-	masterList := hashset.New()
-	masterStack := arraystack.New()
+	masterList := hashset.New()     // The list set ensuring we don't revisit web pages
+	masterStack := arraystack.New() // The list of elements we need to visit
 
-	masterStack.Push(url)
+	masterStack.Push(url) // Adding the first element to the stack
 
-	for numTimes > 0 {
+	for numTimes > 0 { // each numTimes iteration is another depth level
 		numTimes--
 
-		retSet := hashset.New()
-		for masterStack.Size() > 0 {
-			currentUrl, err := masterStack.Pop()
-			if err == false {
+		retSet := hashset.New()      // Form a temporary set to hold elements from our current search
+		for masterStack.Size() > 0 { // Used to visit all of the elements in the stack
+			currentUrl, err := masterStack.Pop() // Get the top element of the stack
+			if err == false {                    // If the stack is empty break; redundent
 				break
 			}
-			tempSet := getPageWords(currentUrl.(string))
-			toStore := tempSet.Values()
+			tempSet := getPageWords(currentUrl.(string)) // Get the urls from a given site
+			toStore := tempSet.Values()                  // Get the string values of the urls
 			for _, value := range toStore {
-				retSet.Add(value)
+				retSet.Add(value) // add the string values of our current search
 			}
 		}
 
+		// Get the values our the search results from every web page we visited on a particular level
 		linkNames := retSet.Values()
 		for _, value := range linkNames {
-			if masterList.Contains(value) {
+			if masterList.Contains(value) { // If we have visited the page before don't revisit
 				continue
 			} else {
+				// If we have not visited the page add it as a page to visit and one not to visit again
 				masterList.Add(value)
 				masterStack.Push(value)
 			}
@@ -94,30 +98,6 @@ func formatUrl(inputUrl string) string {
 }
 
 /*
-	Returns all of the links from all the pages a specified page links to
-
-	ie returns the links from all of the pages the homepage of wikipedia links to
-*/
-func makeGlobalSet(url string) *hashset.Set {
-	returnSet := hashset.New()
-
-	addToReturnSet := getPageWords(url)
-
-	vals := addToReturnSet.Values()
-	for i := 0; i < len(vals); i++ {
-		tempUrl := vals[i].(string)
-		fmt.Println(tempUrl)
-		tempAddToReturnSet := getPageWords(tempUrl)
-		tempVals := tempAddToReturnSet.Values()
-		for j := 0; j < len(tempVals); j++ {
-			returnSet.Add(tempVals[j])
-		}
-
-	}
-	return returnSet
-}
-
-/*
 Returns all of the links on a specified page
 
 ie returns all of the links on the homepage of wikipedia
@@ -126,16 +106,16 @@ ie returns all of the links on the homepage of wikipedia
 func getPageWords(url string) *hashset.Set {
 	returnSet := hashset.New()
 
-	url = formatUrl(url)
+	url = formatUrl(url) // Get the corrected url for a particular page
 
-	response, err := http.Get(url)
+	response, err := http.Get(url) // Get the content of a web page
 	// If there is an error, abandon ship!
 	if err != nil {
 		return returnSet
 	}
-	z := html.NewTokenizer(response.Body)
+	z := html.NewTokenizer(response.Body) // Get the text of a web page
 	for {
-		tt := z.Next()
+		tt := z.Next() // Get each element of a web apge
 
 		switch {
 		case tt == html.ErrorToken:
@@ -144,6 +124,7 @@ func getPageWords(url string) *hashset.Set {
 		case tt == html.StartTagToken:
 			t := z.Token()
 			for _, a := range t.Attr {
+				// If an element is one we are looking for add it to the return set.
 				if a.Key == "href" {
 					// fmt.Println("Found href:", a.Val)
 					var temp string
