@@ -10,28 +10,20 @@ import (
 )
 
 /*
-	First implementation:
+	This is going to add the ability to see how many times a particular page is linked to.
+	Essentially instead of seeing the links found on pages the id-dfs will occur then a
+	list of links along with their number of occurrences will be returned in sorted order.
 
-	Read in elements of a page, add all hrefs to a set (to ensure uniquity), add set
-	to a stack and then iterate through the stack. During each iteration, pop the top
-	of the stack and get all of the links from that page. If there is a link to the
-	page we are looking for, end. Else, add all of those elements to a set. Continue
-	adding all of the elements to a set until the stack is empty. At that point add
-	all of the elements in our set to the stack and start over looking for the element
-	we are looking for.
-*/
-/*
-	Improvements:
-	Track the path of the bfs from the beginning to the end point. This could be done by
-	mapping links the appended address of the links that led got it there. This would
-	make the process slower.
 */
 
-var numTimesLinked map[string]int
+// The number of times a particular page has been linked
+var linkNumbers map[string]int
 
+// TODO: sort the values of linkNumbers before printing them.
+// TODO: remove non http/s links before doing anything else.
 func main() {
 
-	numTimesLinked = make(map[string]int)
+	linkNumbers = make(map[string]int)
 
 	// url is the starting point of our search
 	url := "http://auburn.edu/~bws0013/"
@@ -39,20 +31,17 @@ func main() {
 	//links := getPageWords(url)
 
 	// provide our url and the maximum depth we are trying to go within the web pages
-	links := iterateOverLinks(url, 2)
+	iterateOverLinks(url, 2)
 
-	vals := links.Values()
-
-	// All of the pages we visited in our search
-	for _, value := range vals {
-		fmt.Println(value)
+	for key, value := range linkNumbers {
+		fmt.Println("Key:", key, "Value:", value)
 	}
 
 }
 
 // Perform a modified iterative deepening search, given a web address and a max depth
-func iterateOverLinks(url string, numTimes int) *hashset.Set {
-	masterList := hashset.New()     // The list set ensuring we don't revisit web pages
+func iterateOverLinks(url string, numTimes int) {
+
 	masterStack := arraystack.New() // The list of elements we need to visit
 
 	masterStack.Push(url) // Adding the first element to the stack
@@ -74,19 +63,12 @@ func iterateOverLinks(url string, numTimes int) *hashset.Set {
 		}
 
 		// Get the values our the search results from every web page we visited on a particular level
+		// We know that our linkNames will not be on the linkNumbers map because we already check for this in getPageWords()
 		linkNames := retSet.Values()
 		for _, value := range linkNames {
-			if masterList.Contains(value) { // If we have visited the page before don't revisit
-				continue
-			} else {
-				// If we have not visited the page add it as a page to visit and one not to visit again
-				masterList.Add(value)
-				masterStack.Push(value)
-			}
+			masterStack.Push(value)
 		}
 	}
-
-	return masterList
 }
 
 // Adds http to urls that do not have it. This fixes an error of urls that dont have it.
@@ -130,11 +112,23 @@ func getPageWords(url string) *hashset.Set {
 			for _, a := range t.Attr {
 				// If an element is one we are looking for add it to the return set.
 				if a.Key == "href" {
-					// fmt.Println("Found href:", a.Val)
+
 					var temp string
+					// Store the name of the link
 					temp = a.Val
-					returnSet.Add(temp)
-					//bs.Add(temp)
+
+					// Determine if we have seen this link before by seeing if it is in the map
+					checkIfSeen := linkNumbers[temp]
+					// If its not on the map (checkIfSeen == 0), add it and say we have seen it once
+					// Else increment the number of times we have seen it on the map
+					if checkIfSeen == 0 {
+						linkNumbers[temp] = 1
+						returnSet.Add(temp)
+					} else {
+						numTimes := linkNumbers[temp]
+						numTimes++
+						linkNumbers[temp] = numTimes
+					}
 					break
 				}
 			}
