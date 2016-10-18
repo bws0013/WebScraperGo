@@ -6,6 +6,7 @@ import (
 	"github.com/emirpasic/gods/stacks/arraystack"
 	"golang.org/x/net/html"
 	"net/http"
+	"sort"
 	"strings"
 )
 
@@ -13,7 +14,6 @@ import (
 	This is going to add the ability to see how many times a particular page is linked to.
 	Essentially instead of seeing the links found on pages the id-dfs will occur then a
 	list of links along with their number of occurrences will be returned in sorted order.
-
 */
 
 // The number of times a particular page has been linked
@@ -33,8 +33,14 @@ func main() {
 	// provide our url and the maximum depth we are trying to go within the web pages
 	iterateOverLinks(url, 2)
 
-	for key, value := range linkNumbers {
-		fmt.Println("Key:", key, "Value:", value)
+	var keys []string
+	for k := range linkNumbers {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		fmt.Println("Key:", k, "Value:", linkNumbers[k])
 	}
 
 }
