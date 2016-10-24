@@ -48,6 +48,8 @@ func main() {
 // Perform a modified iterative deepening search, given a web address and a max depth
 func iterateOverLinks(url string, numTimes int) {
 
+	linkNumbers[url] = 1
+
 	masterStack := arraystack.New() // The list of elements we need to visit
 
 	masterStack.Push(url) // Adding the first element to the stack
@@ -128,8 +130,15 @@ func getPageWords(url string) *hashset.Set {
 					// If its not on the map (checkIfSeen == 0), add it and say we have seen it once
 					// Else increment the number of times we have seen it on the map
 					if checkIfSeen == 0 {
-						linkNumbers[temp] = 1
-						returnSet.Add(temp)
+
+						if strings.HasPrefix(temp, "http") {
+							linkNumbers[temp] = 1
+							returnSet.Add(temp)
+						} else if strings.HasPrefix(temp, "https") {
+							linkNumbers[temp] = 1
+							returnSet.Add(temp)
+						}
+
 					} else {
 						numTimes := linkNumbers[temp]
 						numTimes++
