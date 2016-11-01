@@ -36,8 +36,13 @@ func main() {
 
 	// All of the pages we visited in our search
 	for _, value := range vals {
-		fmt.Println(value)
+		//fmt.Println(value)
+		nothing(value.(string))
 	}
+
+}
+
+func nothing(tt string) {
 
 }
 
@@ -58,16 +63,16 @@ func iterateOverLinks(url string, numTimes int) *arraylist.List {
 
 		retSet := arraylist.New()    // Form a temporary set to hold elements from our current search
 		for masterStack.Size() > 0 { // Used to visit all of the elements in the stack
-			currentUrl, err := masterStack.Pop() // Get the top element of the stack
-			if err == false {                    // If the stack is empty break; redundent
-				break
-			}
+			currentUrl, _ := masterStack.Pop() // Get the top element of the stack
+
 			list.Add(currentUrl)
 			tempSet := getPageWords(currentUrl.(string)) // Get the urls from a given site
 			toStore := tempSet.Values()                  // Get the string values of the urls
 			for _, value := range toStore {
-				retSet.Add(value) // add the string values of our current search
+				retSet.Add(value)  // add the string values of our current search
+				fmt.Println(value) // THIS IS CORRECT IT IS JUST BACKWARDS
 			}
+			fmt.Println()
 		}
 		list.Add("#")
 
@@ -133,15 +138,10 @@ func getPageWords(url string) *arraylist.List {
 					checkIfSeen := linkNumbers[temp]
 
 					if checkIfSeen == 0 {
-
 						if strings.HasPrefix(temp, "http") {
 							linkNumbers[temp] = 1
 							returnSet.Add(temp)
-						} else if strings.HasPrefix(temp, "https") {
-							linkNumbers[temp] = 1
-							returnSet.Add(temp)
 						}
-
 					} else {
 						numTimes := linkNumbers[temp]
 						numTimes++

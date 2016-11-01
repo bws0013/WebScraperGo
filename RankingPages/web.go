@@ -134,9 +134,6 @@ func getPageWords(url string) *hashset.Set {
 						if strings.HasPrefix(temp, "http") {
 							linkNumbers[temp] = 1
 							returnSet.Add(temp)
-						} else if strings.HasPrefix(temp, "https") {
-							linkNumbers[temp] = 1
-							returnSet.Add(temp)
 						}
 
 					} else {

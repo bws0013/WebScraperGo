@@ -1,11 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/emirpasic/gods/stacks/arraystack"
 	"golang.org/x/net/html"
-	"net/http"
+	"io/ioutil"
 	"strings"
 )
 
@@ -30,7 +31,7 @@ import (
 func main() {
 
 	// url is the starting point of our search
-	url := "http://auburn.edu/~bws0013/"
+	url := "/Users/bensmith/Documents/School/Fall_2016/ACM_Talk/Big/en/a/m/e/Category~American_record_producers_9c24.html"
 
 	//links := getPageWords(url)
 
@@ -106,14 +107,12 @@ ie returns all of the links on the homepage of wikipedia
 func getPageWords(url string) *hashset.Set {
 	returnSet := hashset.New()
 
-	url = formatUrl(url) // Get the corrected url for a particular page
+	//url = formatUrl(url) // Get the corrected url for a particular page
+	readable := getByteArr(url)
 
-	response, err := http.Get(url) // Get the content of a web page
-	// If there is an error, abandon ship!
-	if err != nil {
-		return returnSet
-	}
-	z := html.NewTokenizer(response.Body) // Get the text of a web page
+	response := bytes.NewReader(readable) // Get the content of a web page
+
+	z := html.NewTokenizer(response) // Get the text of a web page
 	for {
 		tt := z.Next() // Get each element of a web apge
 
@@ -138,6 +137,15 @@ func getPageWords(url string) *hashset.Set {
 		}
 	}
 	return returnSet
+}
+
+func getByteArr(fileName string) []byte {
+	fileBytes, err := ioutil.ReadFile(fileName)
+	if err != nil {
+		return nil
+	}
+	//fmt.Println("HTML:\n\n", string(fileBytes))
+	return fileBytes
 }
 
 /*
