@@ -31,12 +31,12 @@ import (
 func main() {
 
 	// url is the starting point of our search
-	url := "/Users/bensmith/Documents/School/Fall_2016/ACM_Talk/Big/en/a/m/e/Category~American_record_producers_9c24.html"
+	url := "/Users/bensmith/Documents/School/Fall_2016/ACM_Talk/Big/en/e/l/e/Electronic_music.html"
 
 	//links := getPageWords(url)
 
 	// provide our url and the maximum depth we are trying to go within the web pages
-	links := iterateOverLinks(url, 2)
+	links := iterateOverLinks(url, 1)
 
 	vals := links.Values()
 
@@ -106,13 +106,14 @@ ie returns all of the links on the homepage of wikipedia
 */
 func getPageWords(url string) *hashset.Set {
 	returnSet := hashset.New()
-
 	//url = formatUrl(url) // Get the corrected url for a particular page
 	readable := getByteArr(url)
 
 	response := bytes.NewReader(readable) // Get the content of a web page
 
 	z := html.NewTokenizer(response) // Get the text of a web page
+
+	inBody := false
 	for {
 		tt := z.Next() // Get each element of a web apge
 
@@ -122,17 +123,30 @@ func getPageWords(url string) *hashset.Set {
 			return returnSet
 		case tt == html.StartTagToken:
 			t := z.Token()
-			for _, a := range t.Attr {
-				// If an element is one we are looking for add it to the return set.
-				if a.Key == "href" {
-					// fmt.Println("Found href:", a.Val)
+
+			for i := 0; i < len(t.Attr); i++ {
+				a := t.Attr[i]
+
+				if a.Val == "bodyContent" {
+					inBody = true
+				}
+				if a.Val == "catlinks" {
+
+					return returnSet
+				}
+
+				if inBody == true {
 					var temp string
 					temp = a.Val
-					if strings.HasPrefix(temp, "http") {
+					if strings.HasPrefix(temp, "../../../") {
 						returnSet.Add(temp)
 					}
-					break
+
 				}
+				//fmt.Println(a.Val)
+				//for _, a := range t.Attr {
+				// If an element is one we are looking for add it to the return set.
+
 			}
 		}
 	}
