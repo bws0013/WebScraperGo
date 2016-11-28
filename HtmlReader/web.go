@@ -32,23 +32,116 @@ func main() {
 
 	// url is the starting point of our search
 	url := "/Users/bensmith/Documents/School/Fall_2016/ACM_Talk/Big/en/e/l/e/Electronic_music.html"
+	url2 := "/Users/bensmith/Documents/School/Fall_2016/ACM_Talk/Big/en/l/%C3%A9/o/L%C3%A9on_Theremin_eb3a.html"
+
+	tp := connected(url, url2)
+
+	fmt.Println(tp)
 
 	//links := getPageWords(url)
 
 	// provide our url and the maximum depth we are trying to go within the web pages
-	links := iterateOverLinks(url, 1)
+	//links := iterateOverLinks(url, 1)
 
-	vals := links.Values()
+	//vals := links.Values()
 
 	// All of the pages we visited in our search
-	for _, value := range vals {
-		fmt.Println(value)
+	/*
+		for _, value := range vals {
+			fmt.Println(value)
+		}
+	*/
+
+}
+
+// Accepts 2 strings and return if there true is a connection between the two of them; else false
+func connected(url1 string, url2 string) bool {
+
+	/*
+		tl := hashset.New()
+		tl.Add(url1)
+		tl.Add(url2)
+
+		ctl := tl.Values()
+		url1 = ctl[0].(string)
+		url2 = ctl[1].(string)
+	*/
+
+	ts := arraystack.New()
+	ts.Push(url1)
+	ts.Push(url2)
+
+	// Get val + err and then convert val to str.
+
+	fmt.Println(url1)
+	fmt.Println(url2)
+
+	masterList := hashset.New()     // The list set ensuring we don't revisit web pages
+	masterStack := arraystack.New() // The list of elements we need to visit
+
+	//listified := arraystack.New()
+	//listified.Push(url1)
+	//urlTemp, _ := listified.Pop()
+
+	masterStack.Push(url1) // Adding the first element to the stack
+	masterList.Add(url1)
+
+	numTimes := 5
+
+	for numTimes > 0 { // each numTimes iteration is another depth level
+		numTimes--
+
+		retSet := hashset.New()      // Form a temporary set to hold elements from our current search
+		for masterStack.Size() > 0 { // Used to visit all of the elements in the stack
+			currentUrl, err := masterStack.Pop() // Get the top element of the stack
+			if err == false {                    // If the stack is empty break; redundent
+				break
+			}
+			tempSet := getPageWords(currentUrl.(string)) // Get the urls from a given site
+			toStore := tempSet.Values()                  // Get the string values of the urls
+			for _, value := range toStore {
+				retSet.Add(value) // add the string values of our current search
+			}
+		}
+
+		// Get the values our the search results from every web page we visited on a particular level
+		linkNames := retSet.Values()
+		for _, value := range linkNames {
+			if masterList.Contains(value) { // If we have visited the page before don't revisit
+				continue
+			} else {
+
+				// If we have not visited the page add it as a page to visit and one not to visit again
+				masterList.Add(value)
+				masterStack.Push(value)
+				//fmt.Println(value)
+			}
+		}
+
+		if masterList.Contains(url2) {
+			return true
+		}
 	}
+
+	vals := masterList.Values()
+
+	/*for _, value := range vals {
+		fmt.Println(value)
+	}*/
+
+	for _, value := range vals {
+		if value == url2 {
+			return true
+		}
+	}
+
+	return false
 
 }
 
 // Perform a modified iterative deepening search, given a web address and a max depth
 func iterateOverLinks(url string, numTimes int) *hashset.Set {
+
 	masterList := hashset.New()     // The list set ensuring we don't revisit web pages
 	masterStack := arraystack.New() // The list of elements we need to visit
 
