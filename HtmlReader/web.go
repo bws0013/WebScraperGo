@@ -23,7 +23,7 @@ import (
 */
 /*
 	Improvements:
-	Track the path of the bfs from the beginning to the end point. This could be done by
+	Track the path of the idfs from the beginning to the end point. This could be done by
 	mapping links the appended address of the links that led got it there. This would
 	make the process slower.
 */
@@ -38,6 +38,8 @@ func main() {
 
 	fmt.Println(tp)
 
+	fmt.Println(fixUrl(url))
+	fmt.Println(fixUrl(url2))
 	//links := getPageWords(url)
 
 	// provide our url and the maximum depth we are trying to go within the web pages
@@ -54,27 +56,14 @@ func main() {
 
 }
 
+func fixUrl(url string) string {
+	return ("../../.." + url[58:])
+}
+
 // Accepts 2 strings and return if there true is a connection between the two of them; else false
 func connected(url1 string, url2 string) bool {
 
-	/*
-		tl := hashset.New()
-		tl.Add(url1)
-		tl.Add(url2)
-
-		ctl := tl.Values()
-		url1 = ctl[0].(string)
-		url2 = ctl[1].(string)
-	*/
-
-	ts := arraystack.New()
-	ts.Push(url1)
-	ts.Push(url2)
-
-	// Get val + err and then convert val to str.
-
-	fmt.Println(url1)
-	fmt.Println(url2)
+	url2 = fixUrl(url2)
 
 	masterList := hashset.New()     // The list set ensuring we don't revisit web pages
 	masterStack := arraystack.New() // The list of elements we need to visit
@@ -177,18 +166,6 @@ func iterateOverLinks(url string, numTimes int) *hashset.Set {
 	}
 
 	return masterList
-}
-
-// Adds http to urls that do not have it. This fixes an error of urls that dont have it.
-func formatUrl(inputUrl string) string {
-	if strings.HasPrefix(inputUrl, "https://") {
-		return inputUrl
-	} else if strings.HasPrefix(inputUrl, "http://") {
-		return inputUrl
-	} else {
-		return ("http://" + inputUrl)
-	}
-	return "ERROR"
 }
 
 /*

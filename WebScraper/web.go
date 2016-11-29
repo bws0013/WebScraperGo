@@ -31,11 +31,12 @@ func main() {
 
 	// url is the starting point of our search
 	url := "http://auburn.edu/~bws0013/"
+	//url := "https://www.facebook.com/"
 
 	//links := getPageWords(url)
 
 	// provide our url and the maximum depth we are trying to go within the web pages
-	links := iterateOverLinks(url, 2)
+	links := iterateOverLinks(url, 1)
 
 	vals := links.Values()
 
